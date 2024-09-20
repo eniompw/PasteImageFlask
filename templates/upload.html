@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload</title>
+    <style>
+        #pasteArea {
+            width: 300px;
+            height: 200px;
+            border: 1px solid black;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Paste Your Image</h1>
+    <form id="uploadForm">
+        <input type="hidden" name="image" id="imageData">
+        <div id="pasteArea">Paste your image anywhere on the page</div>
+        <button type="submit">Upload Image</button>
+    </form>
+    <div id="message"></div>
+
+    <script>
+        const pasteArea = document.getElementById('pasteArea');
+        const imageData = document.getElementById('imageData');
+        const uploadForm = document.getElementById('uploadForm');
+        const messageDiv = document.getElementById('message');
+
+        document.addEventListener('paste', function(e) {
+            const items = e.clipboardData.items;
+            for (let item of items) {
+                if (item.type.indexOf('image') !== -1) {
+                    const blob = item.getAsFile();
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        pasteArea.innerHTML = `<img src="${event.target.result}" style="max-width: 100%; max-height: 100%;">`;
+                        imageData.value = event.target.result;
+                    };
+                    reader.readAsDataURL(blob);
+                    return;
+                }
+            }
+            messageDiv.textContent = "No image found in clipboard. Please try again.";
+        });
+
+        uploadForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!imageData.value) {
+                messageDiv.textContent = "Please paste an image before submitting.";
+                return;
+            }
+            try {
+                const response = await fetch('/', {
+                    method: 'POST',
+                    body: new FormData(uploadForm)
+                });
+                messageDiv.textContent = await response.text();
+            } catch (error) {
+                messageDiv.textContent = "An error occurred while uploading the image.";
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
