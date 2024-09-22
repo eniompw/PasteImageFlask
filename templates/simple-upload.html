@@ -12,26 +12,27 @@
     </form>
 
     <script>
-        document.addEventListener('paste', e => {
-            const item = Array.from(e.clipboardData.items).find(item => item.type.startsWith('image'));
-            if (item) {
+        document.addEventListener('paste', event => {
+            const imageItem = [...event.clipboardData.items].find(item => item.type.startsWith('image'));
+            if (imageItem) {
                 const reader = new FileReader();
-                reader.onload = event => {
-                    document.getElementById('pasteArea').innerHTML = `<img src="${event.target.result}" style="max-width:100%">`;
-                    document.getElementById('imageData').value = event.target.result;
+                reader.onload = loadEvent => {
+                    pasteArea.innerHTML = `<img src="${loadEvent.target.result}" style="max-width:100%">`;
+                    imageData.value = loadEvent.target.result;
                 };
-                reader.readAsDataURL(item.getAsFile());
+                reader.readAsDataURL(imageItem.getAsFile());
             }
         });
 
-        document.getElementById('uploadForm').addEventListener('submit', async e => {
-            e.preventDefault();
+        uploadForm.onsubmit = async submitEvent => {
+            submitEvent.preventDefault();
             const response = await fetch('/', {
                 method: 'POST',
-                body: new FormData(e.target)
+                body: new FormData(submitEvent.target)
             });
-            console.log(await response.text());
-        });
+            const responseText = await response.text();
+            console.log(responseText);
+        };
     </script>
 </body>
 </html>
