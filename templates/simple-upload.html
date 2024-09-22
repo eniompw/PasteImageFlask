@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Image Upload</title>
+</head>
+<body>
+    <form id="uploadForm">
+        <input type="hidden" name="image" id="imageData">
+        <div id="pasteArea">Paste your image here</div>
+        <button type="submit">Upload</button>
+    </form>
+
+    <script>
+        document.addEventListener('paste', e => {
+            const item = Array.from(e.clipboardData.items).find(item => item.type.startsWith('image'));
+            if (item) {
+                const reader = new FileReader();
+                reader.onload = event => {
+                    document.getElementById('pasteArea').innerHTML = `<img src="${event.target.result}" style="max-width:100%">`;
+                    document.getElementById('imageData').value = event.target.result;
+                };
+                reader.readAsDataURL(item.getAsFile());
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', async e => {
+            e.preventDefault();
+            const response = await fetch('/', {
+                method: 'POST',
+                body: new FormData(e.target)
+            });
+            console.log(await response.text());
+        });
+    </script>
+</body>
+</html>
